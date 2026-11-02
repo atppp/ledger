@@ -1,0 +1,55 @@
+name: Deploy Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # Keep installing Pandoc from GitHub: ubuntu-latest apt is too old for our
+      # Makefile flags (--syntax-highlighting needs >=3.8, --math-method >=3.11).
+      # Even Ubuntu 26 (resolute) only ships ~3.7, so apt still would not be enough.
+      - name: Install pandoc
+        env:
+          PANDOC_VERSION: "3.13"
+        run: |
+          curl -fsSL -o pandoc.deb \
+            "https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-1-amd64.deb"
+          sudo dpkg -i pandoc.deb
+          pandoc --version
+
+      - name: Build HTML
+        run: make -C build html
+
+      - name: Stage site
+        run: |
+          mkdir -p _site
+          cp build/ledger.html _site/index.html
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

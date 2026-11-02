@@ -1,0 +1,309 @@
+<style>
+html {
+  color-scheme: light;
+}
+
+body {
+  max-width: 42rem;
+  margin: 2rem auto;
+  padding: 0 1.25rem;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.55;
+  color: #222;
+  background: #fff;
+}
+
+#toc-drawer {
+  margin: 0 0 1.5rem;
+}
+
+#toc-drawer > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  padding: 0.7rem 1rem;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.2;
+  user-select: none;
+}
+
+#toc-drawer > summary::-webkit-details-marker,
+#toc-drawer > summary::marker {
+  display: none;
+  content: none;
+}
+
+#toc-drawer > summary::before {
+  content: "";
+  flex: none;
+  width: 0.95em;
+  height: 0.7em;
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 100% 0.12em no-repeat,
+    linear-gradient(currentColor, currentColor) 0 50% / 100% 0.12em no-repeat,
+    linear-gradient(currentColor, currentColor) 0 100% / 100% 0.12em no-repeat;
+}
+
+#toc-drawer[open] > summary {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+nav#TOC {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  background: #f6f6f6;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: min(70vh, 28rem);
+  overflow-y: auto;
+}
+
+nav#TOC ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.35rem 0;
+}
+
+nav#TOC ul ul {
+  padding-left: 0.9rem;
+}
+
+nav#TOC li {
+  margin: 0.25rem 0;
+}
+
+nav#TOC a {
+  color: #333;
+  text-decoration: none;
+  border-radius: 3px;
+  padding: 0.1rem 0.25rem;
+  margin-left: -0.25rem;
+}
+
+nav#TOC a:hover {
+  text-decoration: underline;
+}
+
+nav#TOC a.toc-active {
+  background: #e2e8f0;
+  color: #111;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Mobile: keep Contents control pinned to the top. */
+@media screen and (max-width: 61.99rem) {
+  body {
+    padding-top: 4.25rem;
+  }
+
+  #toc-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    margin: 0;
+    padding: 0.5rem 0.75rem 0.65rem;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  #toc-drawer > summary {
+    background: #f0f0f0;
+  }
+
+  #toc-drawer[open] nav#TOC {
+    max-height: min(70vh, 28rem);
+  }
+}
+
+/* Desktop: fixed left TOC sidebar. */
+@media screen and (min-width: 62rem) {
+  body {
+    max-width: none;
+    margin: 0;
+    padding: 2rem 2rem 2rem 21rem;
+  }
+
+  body > :not(#toc-drawer) {
+    max-width: 42rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #toc-drawer {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 18rem;
+    margin: 0;
+    border-right: 1px solid #ddd;
+    background: #f6f6f6;
+    overflow-y: auto;
+  }
+
+  #toc-drawer > summary {
+    display: none;
+  }
+
+  nav#TOC {
+    height: auto;
+    max-height: none;
+    margin: 0;
+    padding: 1.25rem 1rem 1.25rem 1.25rem;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    overflow: visible;
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+}
+
+@media print {
+  #toc-drawer > summary {
+    display: none;
+  }
+
+  #toc-drawer,
+  nav#TOC {
+    position: static;
+    width: auto;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    border: none;
+    background: transparent;
+    page-break-after: always;
+  }
+
+  body {
+    padding: 0;
+    max-width: none;
+  }
+}
+
+code, pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+pre {
+  overflow-x: auto;
+  padding: 0.85rem 1rem;
+  background: #f4f4f4;
+  border-radius: 4px;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 0.35rem 0.7rem;
+  text-align: left;
+}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var toc = document.getElementById("TOC");
+  if (!toc) return;
+
+  if (!document.getElementById("toc-drawer")) {
+    var drawer = document.createElement("details");
+    drawer.id = "toc-drawer";
+
+    var summary = document.createElement("summary");
+    summary.textContent = "Contents";
+    drawer.appendChild(summary);
+
+    toc.parentNode.insertBefore(drawer, toc);
+    drawer.appendChild(toc);
+
+    var wide = window.matchMedia("(min-width: 62rem)");
+
+    function syncOpen() {
+      drawer.open = wide.matches;
+    }
+
+    syncOpen();
+    wide.addEventListener("change", syncOpen);
+
+    toc.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", function () {
+        if (!wide.matches) drawer.open = false;
+      });
+    });
+  }
+
+  var links = Array.prototype.slice.call(toc.querySelectorAll('a[href^="#"]'));
+  var sections = links
+    .map(function (link) {
+      var id = decodeURIComponent(link.getAttribute("href").slice(1));
+      var el = document.getElementById(id);
+      return el ? { link: link, el: el } : null;
+    })
+    .filter(Boolean);
+
+  if (!sections.length) return;
+
+  var activeLink = null;
+
+  function setActive(link) {
+    if (link === activeLink) return;
+    if (activeLink) activeLink.classList.remove("toc-active");
+    activeLink = link;
+    if (activeLink) {
+      activeLink.classList.add("toc-active");
+      var scroller = activeLink.closest("#toc-drawer") || activeLink.closest("nav");
+      if (scroller && scroller.scrollHeight > scroller.clientHeight) {
+        var linkRect = activeLink.getBoundingClientRect();
+        var navRect = scroller.getBoundingClientRect();
+        if (linkRect.top < navRect.top + 40 || linkRect.bottom > navRect.bottom - 40) {
+          activeLink.scrollIntoView({ block: "nearest" });
+        }
+      }
+    }
+  }
+
+  function updateActive() {
+    var probe = window.innerHeight * 0.25;
+    var current = sections[0].link;
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].el.getBoundingClientRect().top <= probe) {
+        current = sections[i].link;
+      } else {
+        break;
+      }
+    }
+    setActive(current);
+  }
+
+  var scheduled = false;
+  function onScroll() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(function () {
+      scheduled = false;
+      updateActive();
+    });
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  updateActive();
+});
+</script>

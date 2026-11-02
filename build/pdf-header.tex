@@ -1,0 +1,34 @@
+% Styling for fenced code blocks (beancount, python, csv, …).
+% Pandoc wraps highlighted code in a Shaded environment; restyle it after
+% the default definition is in place.
+\usepackage{newunicodechar}
+% Latin Modern (XeLaTeX default) lacks these glyphs; map them to math.
+\newunicodechar{≈}{\ensuremath{\approx}}
+\newunicodechar{−}{\ensuremath{-}}
+\newunicodechar{×}{\ensuremath{\times}}
+\newunicodechar{÷}{\ensuremath{\div}}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable,skins}
+
+\AtBeginDocument{%
+  \renewenvironment{Shaded}{%
+    \begin{tcolorbox}[
+      breakable,
+      enhanced,
+      colback=black!4,
+      colframe=black!28,
+      boxrule=0.4pt,
+      arc=1pt,
+      enlarge left by=4mm,
+      enlarge right by=4mm,
+      left=5mm,
+      right=5mm,
+      top=2.5mm,
+      bottom=2.5mm,
+      before skip=10pt,
+      after skip=10pt,
+    ]%
+  }{%
+    \end{tcolorbox}%
+  }%
+}
